@@ -155,7 +155,10 @@ def _broadcast_event(event_type: str, event_label: str) -> dict:
     """Normalise payload building and response shaping."""
     target = (event_label or "").strip()
     if not target:
-        return {"success": False, "error": "Parameter 'event_label' must not be empty"}
+        return {"success": False, 
+                "event": "switch_page", 
+                "error": "Parameter 'event_label' must not be empty"
+                }
     
     payload: Dict[str, Any] = {
         "EntityClass": "/Game/_DEV/Metahuman/Blueprint/BP_BertVITSLocalManager_Metahuman.BP_BertVITSLocalManager_Metahuman_C",
@@ -170,7 +173,10 @@ def _broadcast_event(event_type: str, event_label: str) -> dict:
         stats = hub.broadcast(payload)
     except Exception as exc:  # noqa: BLE001 - surface to caller
         logger.exception("Failed to broadcast %s command", event_type)
-        return {"success": False, "error": str(exc)}
+        return {"success": False, 
+                "event": "switch_page", 
+                "error": str(exc)
+                }
 
     logger.info(
         "Event type: %s(%s) delivered to %d/%d clients",
@@ -179,7 +185,11 @@ def _broadcast_event(event_type: str, event_label: str) -> dict:
         stats["delivered"],
         stats["clients"],
     )
-    return { "success": True, "current_page": event_label }
+    return {
+    "success": True,
+    "event": "switch_page",
+    "page_name": event_label
+}
 
 @mcp.tool()
 def switch_page(page_name: Literal[
