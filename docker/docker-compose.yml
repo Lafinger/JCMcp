@@ -1,0 +1,34 @@
+# 固定 Compose 项目名称，避免因为文件位于 docker 目录而误用 docker 作为项目名。
+name: jcmcp
+# 使用 Compose 的 services 节定义当前项目要启动的容器服务。
+services:
+  # 定义运行 unreal_controller_mcp.py 的 MCP 服务。
+  unreal-controller-mcp:
+    # 指定镜像构建配置。
+    build:
+      # 使用上一级项目根目录作为构建上下文，便于复制源码和依赖文件。
+      context: ..
+      # 指定项目根目录下的 docker/Dockerfile 作为镜像构建文件。
+      dockerfile: docker/Dockerfile
+      # 传入基础镜像构建参数，默认使用当前机器上已经存在的 Python 镜像以确保可直接构建。
+      args:
+        # 如可访问 Docker Hub，可在外部设置 BASE_IMAGE=python:3.11-slim 覆盖这里的默认值。
+        BASE_IMAGE: ${BASE_IMAGE:-ghcr.nju.edu.cn/xinnan-tech/mcp-endpoint-server:latest}
+    # 为构建出来的镜像指定一个固定名称，便于后续复用和排查。
+    image: jcmcp-unreal-controller-mcp:latest
+    # 为容器指定固定名称，便于通过 docker ps 和 docker logs 定位。
+    container_name: jcmcp-unreal-controller-mcp
+    # 让容器在异常退出后自动重启，提高部署稳定性。
+    restart: unless-stopped
+    # 显式声明容器运行时环境变量。
+    environment:
+      # 让 WebSocket 服务在容器内监听全部网卡，便于宿主机通过端口映射访问。
+      CONTROLLER_WS_HOST: 0.0.0.0
+      # 显式设置 WebSocket 控制端口，和脚本默认值保持一致。
+      CONTROLLER_WS_PORT: "8765"
+    # 将宿主机端口映射到容器端口。
+    ports:
+      # 暴露 MCP 的 streamable HTTP 接口到宿主机 6565 端口。
+      - "6565:6565"
+      # 暴露 WebSocket 控制接口到宿主机 8765 端口。
+      - "8765:8765"

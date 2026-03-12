@@ -1,0 +1,14 @@
+# 忽略 Git 元数据目录，减少无关构建上下文传输。
+.git
+# 忽略本地虚拟环境目录，避免把宿主机解释器和依赖打进镜像。
+.venv
+# 忽略 Python 字节码缓存目录。
+__pycache__
+# 忽略 Python 字节码缓存文件。
+*.pyc
+# 忽略 pytest 运行缓存目录。
+.pytest_cache
+# 忽略 mypy 分析缓存目录。
+.mypy_cache
+# 忽略常见编辑器配置目录。
+.vscode
